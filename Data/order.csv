@@ -1,0 +1,10 @@
+105.0,10,1,sell,Seller_A
+100.0,5,2,sell,Seller_B
+99.0,8,3,sell,Seller_C
+106.0,20,4,buy,Buyer_X
+105.0,5,5,buy,Buyer_Y
+98.0,15,6,sell,Seller_D
+100.0,10,7,buy,Buyer_Z
+104.0,12,8,sell,Seller_E
+106.0,25,9,buy,Buyer_W
+105.0,10,10,sell,Seller_F
