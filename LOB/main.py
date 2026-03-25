@@ -7,13 +7,14 @@ if __name__ == "__main__":
         for line in f:
             row_data = line.strip().split(',')
             
-            price = float(row_data[0])
-            size = int(row_data[1])
-            time = int(row_data[2])
-            side = row_data[3]
-            order_id = row_data[4]
+            ticker = row_data[0]
+            price = float(row_data[1])
+            size = int(row_data[2])
+            time = int(row_data[3])
+            side = row_data[4]
+            order_id = row_data[5]
             
-            order = Order(price, size, time, side, order_id)
+            order = Order(ticker,price, size, time, side, order_id)
             book.add_order(order)
             
     print("\n--- Final Book State ---")
