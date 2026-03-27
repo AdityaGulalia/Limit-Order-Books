@@ -1,7 +1,7 @@
 import requests
 
 # Make sure this matches the port your server is running on!
-BASE_URL = "http://127.0.0.1:8001"
+BASE_URL = "http://127.0.0.1:8000"
 
 order_data = {
     "price": 150.0,

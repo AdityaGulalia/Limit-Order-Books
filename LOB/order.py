@@ -17,7 +17,7 @@ class OrderBook:
     def __init__(self):
         self.buy = []
         self.sell = []
-        self.executed_trades = {}
+        # We no longer need self.executed_trades here because MySQL is our history!
         
     def add_order(self, order: Order):
         if order.side == 'buy':
@@ -25,51 +25,34 @@ class OrderBook:
         else:
             self.sell.append(order)
         
-        # first we sort the two lists of sellers and buyers in such a way that the seller list is sorted
-        # in such a way that the lowest price is at the end of the list and the buyer list is sorted in 
-        # such a way that the highest price is at the end of the list. This way we can easily match 
-        # orders by comparing the last elements of both lists.
-        
         self.sell.sort(key=lambda x: (x.price, x.time), reverse=True)
         self.buy.sort(key=lambda x: (x.price, -x.time))
+        
+        # 1. Create a "basket" to catch any matches that happen right now
+        new_matches = []
         
         while self.buy and self.sell and self.buy[-1].price >= self.sell[-1].price:
             best_buyer = self.buy[-1]
             best_seller = self.sell[-1]
-            
             trade_size = min(best_buyer.size, best_seller.size)
             
-            print(f"TRADE EXECUTED: {trade_size} shares at ${best_seller.price} (Buyer: {best_buyer.order_id}, Seller: {best_seller.order_id})")
-            
+            # 2. Create the receipt
             trade_record = {
                 "buyer_id": best_buyer.order_id,
                 "seller_id": best_seller.order_id,
-                "price": best_seller.price,
-                "size": trade_size
+                "price": best_seller.price, # Execution happens at the resting price
+                "size": trade_size,
+                "ticker": order.ticker
             }
             
-            # Save the trade in the dictionary under its specific ticker
-            ticker = best_buyer.ticker
-            if ticker not in self.executed_trades:
-                self.executed_trades[ticker] = []
-            self.executed_trades[ticker].append(trade_record)
+            # 3. Toss it in the basket
+            new_matches.append(trade_record)
             
             best_buyer.size -= trade_size
             best_seller.size -= trade_size
             
-            if best_buyer.size == 0:
-                self.buy.pop()
-                
-            if best_seller.size == 0:
-                self.sell.pop()
-
-    def cancel_order(self, order_id: str):
-        for order_list in [self.buy, self.sell]:
-            for i, order in enumerate(order_list):
-                if order.order_id == order_id:
-                    print(f"Order {order_id} cancelled.")
-                    del order_list[i]
-                    return True
-        print(f"Order {order_id} not found for cancellation.")
-        return False
-    
+            if best_buyer.size == 0: self.buy.pop()
+            if best_seller.size == 0: self.sell.pop()
+            
+        # 4. Hand the basket back to the server!
+        return new_matches
